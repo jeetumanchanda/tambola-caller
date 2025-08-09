@@ -1,143 +1,98 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tambola Caller</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#d32f2f">
 <style>
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(to bottom, #ffe259, #ffa751);
-    text-align: center;
-    margin: 0;
-    padding: 0;
-  }
-  h1 {
-    color: #fff;
-    margin: 15px 0;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-  }
-  .board {
-    display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    gap: 5px;
-    max-width: 520px;
-    margin: 0 auto;
-    padding: 10px;
-  }
-  .cell {
-    padding: 10px;
-    border-radius: 8px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #fff;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .cell:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
-  }
-  .marked {
-    background: red !important;
-    border: 2px solid #fff;
-    border-radius: 50%;
-    color: #fff;
-    box-shadow: 0 0 15px rgba(255,255,255,0.8);
-  }
-  .call-button {
-    margin-top: 20px;
-    background: radial-gradient(circle at 30% 30%, #ffecb3, #f57c00);
-    border: none;
-    border-radius: 50%;
-    padding: 20px;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-    transition: transform 0.2s ease;
-  }
-  .call-button:hover {
-    transform: scale(1.05);
-  }
-  .call-button img {
-    width: 60px;
-    height: 60px;
-  }
-  .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.85);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 120px;
-    font-weight: bold;
-    text-shadow: 0 0 20px yellow, 0 0 40px orange;
-    display: none;
-    z-index: 1000;
-  }
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #222;
+        color: white;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+    }
+    .board {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 5px;
+        max-width: 500px;
+        margin: 20px auto;
+    }
+    .cell {
+        background-color: #444;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 18px;
+        transition: background-color 0.3s, transform 0.2s;
+    }
+    .cell.marked {
+        background-color: red;
+        color: white;
+        transform: scale(1.1);
+    }
+    .bell-button {
+        background: linear-gradient(to bottom, #ffcc00, #ff9900);
+        border: none;
+        border-radius: 50%;
+        width: 80px;
+        height: 80px;
+        font-size: 30px;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        margin-top: 20px;
+    }
+    .overlay {
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.85);
+        color: yellow;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
+        display: none;
+        z-index: 1000;
+    }
 </style>
 </head>
 <body>
-
 <h1>Tambola Caller</h1>
 <div class="board" id="board"></div>
-
-<button class="call-button" onclick="callNumber()">
-  <img src="https://cdn-icons-png.flaticon.com/512/61/61088.png" alt="Call">
-</button>
-
+<button class="bell-button" id="callBtn">🔔</button>
 <div class="overlay" id="overlay"></div>
-
 <script>
-  const board = document.getElementById('board');
-  const overlay = document.getElementById('overlay');
-  let numbers = Array.from({ length: 90 }, (_, i) => i + 1);
-  let calledNumbers = [];
+    let numbers = Array.from({length: 90}, (_, i) => i + 1);
+    let called = [];
+    const board = document.getElementById('board');
+    const overlay = document.getElementById('overlay');
 
-  const colors = [
-    '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5',
-    '#2196f3', '#03a9f4', '#00bcd4', '#009688', '#4caf50',
-    '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107', '#ff9800',
-    '#ff5722', '#795548', '#607d8b'
-  ];
+    numbers.forEach(num => {
+        let cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.id = 'cell-' + num;
+        cell.textContent = num;
+        board.appendChild(cell);
+    });
 
-  function createBoard() {
-    for (let i = 1; i <= 90; i++) {
-      const cell = document.createElement('div');
-      cell.classList.add('cell');
-      cell.id = 'cell-' + i;
-      cell.innerText = i;
-      cell.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-      board.appendChild(cell);
+    document.getElementById('callBtn').addEventListener('click', () => {
+        if (numbers.length === 0) return;
+        let idx = Math.floor(Math.random() * numbers.length);
+        let num = numbers.splice(idx, 1)[0];
+        called.push(num);
+        document.getElementById('cell-' + num).classList.add('marked');
+        overlay.textContent = num;
+        overlay.style.display = 'flex';
+        setTimeout(() => overlay.style.display = 'none', 5000);
+    });
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js');
     }
-  }
-
-  function callNumber() {
-    if (numbers.length === 0) {
-      alert('All numbers have been called!');
-      return;
-    }
-    const randomIndex = Math.floor(Math.random() * numbers.length);
-    const number = numbers.splice(randomIndex, 1)[0];
-    calledNumbers.push(number);
-    document.getElementById('cell-' + number).classList.add('marked');
-    showOverlay(number);
-  }
-
-  function showOverlay(number) {
-    overlay.innerText = number;
-    overlay.style.display = 'flex';
-    setTimeout(() => {
-      overlay.style.display = 'none';
-    }, 5000);
-  }
-
-  createBoard();
 </script>
-
 </body>
 </html>
