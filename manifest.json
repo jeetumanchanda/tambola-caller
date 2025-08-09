@@ -1,15 +1,1 @@
-{
-  "name": "Tambola Caller",
-  "short_name": "Tambola",
-  "start_url": ".",
-  "display": "standalone",
-  "background_color": "#ff9800",
-  "theme_color": "#ff5722",
-  "icons": [
-    {
-      "src": "icon.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
-}
+{"name": "Tambola Caller", "short_name": "Tambola", "start_url": ".", "display": "standalone", "background_color": "#071023", "theme_color": "#071023", "icons": [{"src": "icon.png", "sizes": "512x512", "type": "image/png"}]}
