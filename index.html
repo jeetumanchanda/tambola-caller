@@ -3,96 +3,133 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tambola Caller</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#d32f2f">
+<title>Tambola Caller</title>
 <style>
     body {
         font-family: Arial, sans-serif;
-        background-color: #222;
-        color: white;
         text-align: center;
+        background: linear-gradient(to bottom right, #ff9800, #ff5722);
         margin: 0;
         padding: 0;
+        color: white;
     }
     .board {
         display: grid;
         grid-template-columns: repeat(10, 1fr);
         gap: 5px;
-        max-width: 500px;
+        max-width: 600px;
         margin: 20px auto;
     }
     .cell {
-        background-color: #444;
-        padding: 10px;
+        background: #fff;
+        color: #333;
         border-radius: 5px;
+        padding: 10px 0;
+        font-weight: bold;
         font-size: 18px;
-        transition: background-color 0.3s, transform 0.2s;
     }
-    .cell.marked {
-        background-color: red;
+    .marked {
+        background: red;
         color: white;
-        transform: scale(1.1);
+        border-radius: 50%;
     }
-    .bell-button {
-        background: linear-gradient(to bottom, #ffcc00, #ff9900);
+    .controls {
+        margin-top: 15px;
+    }
+    .btn {
+        background: gold;
         border: none;
         border-radius: 50%;
-        width: 80px;
-        height: 80px;
-        font-size: 30px;
+        padding: 20px;
         cursor: pointer;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        margin-top: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .stats {
+        margin-top: 10px;
+        font-size: 16px;
     }
     .overlay {
         position: fixed;
         top: 0; left: 0;
         width: 100%; height: 100%;
         background: rgba(0,0,0,0.85);
-        color: yellow;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 80px;
-        display: none;
+        font-size: 120px;
+        color: yellow;
+        font-weight: bold;
+        text-shadow: 0 0 20px red, 0 0 40px orange, 0 0 60px yellow;
+        animation: pop 0.5s ease-in-out;
         z-index: 1000;
+    }
+    @keyframes pop {
+        0% { transform: scale(0.5); opacity: 0; }
+        50% { transform: scale(1.2); opacity: 1; }
+        100% { transform: scale(1); }
     }
 </style>
 </head>
 <body>
 <h1>Tambola Caller</h1>
 <div class="board" id="board"></div>
-<button class="bell-button" id="callBtn">🔔</button>
-<div class="overlay" id="overlay"></div>
+<div class="controls">
+    <button id="callBtn" class="btn">🔔</button>
+    <button id="resetBtn" class="btn" style="background:#f44336; margin-left:15px;">♻️</button>
+    <div class="stats">
+        Last Call: <span id="lastCall">-</span> | Calls Made: <span id="callsMade">0</span> / 90
+    </div>
+</div>
+<div id="overlay" class="overlay" style="display:none;"></div>
 <script>
-    let numbers = Array.from({length: 90}, (_, i) => i + 1);
-    let called = [];
+    let calledNumbers = [];
     const board = document.getElementById('board');
     const overlay = document.getElementById('overlay');
+    const lastCall = document.getElementById('lastCall');
+    const callsMade = document.getElementById('callsMade');
 
-    numbers.forEach(num => {
-        let cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.id = 'cell-' + num;
-        cell.textContent = num;
-        board.appendChild(cell);
-    });
+    function createBoard() {
+        board.innerHTML = '';
+        for (let i = 1; i <= 90; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.id = 'cell-' + i;
+            cell.textContent = i;
+            board.appendChild(cell);
+        }
+    }
 
-    document.getElementById('callBtn').addEventListener('click', () => {
-        if (numbers.length === 0) return;
-        let idx = Math.floor(Math.random() * numbers.length);
-        let num = numbers.splice(idx, 1)[0];
-        called.push(num);
+    function callNumber() {
+        if (calledNumbers.length >= 90) return;
+        let num;
+        do {
+            num = Math.floor(Math.random() * 90) + 1;
+        } while (calledNumbers.includes(num));
+        calledNumbers.push(num);
         document.getElementById('cell-' + num).classList.add('marked');
+        lastCall.textContent = num;
+        callsMade.textContent = calledNumbers.length;
+        showOverlay(num);
+    }
+
+    function showOverlay(num) {
         overlay.textContent = num;
         overlay.style.display = 'flex';
         setTimeout(() => overlay.style.display = 'none', 5000);
-    });
-
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js');
     }
+
+    function resetGame() {
+        calledNumbers = [];
+        createBoard();
+        lastCall.textContent = '-';
+        callsMade.textContent = '0';
+    }
+
+    document.getElementById('callBtn').addEventListener('click', callNumber);
+    document.getElementById('resetBtn').addEventListener('click', resetGame);
+
+    createBoard();
 </script>
 </body>
 </html>
